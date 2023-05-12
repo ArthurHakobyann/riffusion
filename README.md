@@ -1,9 +1,10 @@
 *Change the parameters in img2img.py and run img2img.py *
 
-
-
-
-
+,
+,
+,
+,
+,
 
 
 
