@@ -10,44 +10,18 @@ from PIL import Image
 from riffusion.datatypes import InferenceInput, PromptInput
 from riffusion.spectrogram_params import SpectrogramParams
 from riffusion.streamlit import util as streamlit_util
-from riffusion.streamlit.tasks.interpolation import get_prompt_inputs, run_interpolation
+#from riffusion.streamlit.tasks.interpolation import get_prompt_inputs, run_interpolation
 from riffusion.util import audio_util
 
 
 def render() -> None:
-    st.subheader("✨ Audio to Audio")
-    st.write(
-        """
-    Modify existing audio from a text prompt or interpolate between two.
-    """
-    )
-
-    with st.expander("Help", False):
-        st.write(
-            """
-            This tool allows you to upload an audio file of arbitrary length and modify it with
-            a text prompt. It does this by sweeping over the audio in overlapping clips, doing
-            img2img style transfer with riffusion, then stitching the clips back together with
-            cross fading to eliminate seams.
-
-            Try a denoising strength of 0.4 for light modification and 0.55 for more heavy
-            modification. The best specific denoising depends on how different the prompt is
-            from the source audio. You can play with the seed to get infinite variations.
-            Currently the same seed is used for all clips along the track.
-
-            If the Interpolation check box is enabled, supports entering two sets of prompt,
-            seed, and denoising value and smoothly blends between them along the selected
-            duration of the audio. This is a great way to create a transition.
-            """
-        )
-
-    device = streamlit_util.select_device(st.sidebar)
-    extension = streamlit_util.select_audio_extension(st.sidebar)
-    checkpoint = streamlit_util.select_checkpoint(st.sidebar)
-
+    print("-*-*-**-*")
+    device = "cuda"
+    extension = "mp3"
+    checkpoint = "riffusion/riffusion-model-v1"
+    
     use_20k = st.sidebar.checkbox("Use 20kHz", value=False)
     use_magic_mix = st.sidebar.checkbox("Use Magic Mix", False)
-
     with st.sidebar:
         num_inference_steps = T.cast(
             int,
@@ -75,7 +49,7 @@ def render() -> None:
         type=streamlit_util.AUDIO_EXTENSIONS,
         label_visibility="collapsed",
     )
-
+    print(audio_file)
     if not audio_file:
         st.info("Upload audio to get started")
         return
@@ -95,11 +69,11 @@ def render() -> None:
     start_time_s = clip_p["start_time_s"]
     clip_duration_s = clip_p["clip_duration_s"]
     overlap_duration_s = clip_p["overlap_duration_s"]
-    
+
     duration_s = min(clip_p["duration_s"], segment.duration_seconds - start_time_s)
     increment_s = clip_duration_s - overlap_duration_s
     clip_start_times = start_time_s + np.arange(0, duration_s - clip_duration_s, increment_s)
-    print(clip_p["duration_s"])
+
     write_clip_details(
         clip_start_times=clip_start_times,
         clip_duration_s=clip_duration_s,
@@ -269,7 +243,6 @@ def render() -> None:
                 checkpoint=checkpoint,
             )
         else:
-            print(prompt_input_a)
             image = streamlit_util.run_img2img(
                 prompt=prompt_input_a.prompt,
                 init_image=init_image_resized,
@@ -330,7 +303,7 @@ def render() -> None:
     output_name = f"{input_name}_{prompt_input_a.prompt.replace(' ', '_')}"
     streamlit_util.display_and_download_audio(combined_segment, output_name, extension=extension)
 
-
+render()
 def get_clip_params(advanced: bool = False) -> T.Dict[str, T.Any]:
     """
     Render the parameters of slicing audio into clips.

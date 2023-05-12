@@ -33,7 +33,6 @@ SCHEDULER_OPTIONS = [
 ]
 
 
-@st.cache_resource
 def load_riffusion_checkpoint(
     checkpoint: str = DEFAULT_CHECKPOINT,
     no_traced_unet: bool = False,
@@ -49,7 +48,6 @@ def load_riffusion_checkpoint(
     )
 
 
-@st.cache_resource
 def load_stable_diffusion_pipeline(
     checkpoint: str = DEFAULT_CHECKPOINT,
     device: str = "cuda",
@@ -109,7 +107,6 @@ def get_scheduler(scheduler: str, config: T.Any) -> T.Any:
         raise ValueError(f"Unknown scheduler {scheduler}")
 
 
-@st.cache_resource
 def pipeline_lock() -> threading.Lock:
     """
     Singleton lock used to prevent concurrent access to any model pipeline.
@@ -117,7 +114,6 @@ def pipeline_lock() -> threading.Lock:
     return threading.Lock()
 
 
-@st.cache_resource
 def load_stable_diffusion_img2img_pipeline(
     checkpoint: str = DEFAULT_CHECKPOINT,
     device: str = "cuda",
@@ -145,7 +141,6 @@ def load_stable_diffusion_img2img_pipeline(
     return pipeline
 
 
-@st.cache_data(persist=True)
 def run_txt2img(
     prompt: str,
     num_inference_steps: int,
@@ -184,15 +179,12 @@ def run_txt2img(
         return output["images"][0]
 
 
-@st.cache_resource
 def spectrogram_image_converter(
     params: SpectrogramParams,
     device: str = "cuda",
 ) -> SpectrogramImageConverter:
     return SpectrogramImageConverter(params=params, device=device)
 
-
-@st.cache
 def spectrogram_image_from_audio(
     segment: pydub.AudioSegment,
     params: SpectrogramParams,
@@ -200,9 +192,6 @@ def spectrogram_image_from_audio(
 ) -> Image.Image:
     converter = spectrogram_image_converter(params=params, device=device)
     return converter.spectrogram_image_from_audio(segment)
-
-
-@st.cache_data
 def audio_segment_from_spectrogram_image(
     image: Image.Image,
     params: SpectrogramParams,
@@ -211,8 +200,6 @@ def audio_segment_from_spectrogram_image(
     converter = spectrogram_image_converter(params=params, device=device)
     return converter.audio_from_spectrogram_image(image)
 
-
-@st.cache_data
 def audio_bytes_from_spectrogram_image(
     image: Image.Image,
     params: SpectrogramParams,
@@ -225,7 +212,6 @@ def audio_bytes_from_spectrogram_image(
     segment.export(audio_bytes, format=output_format)
 
     return audio_bytes
-
 
 def select_device(container: T.Any = st.sidebar) -> str:
     """
@@ -288,17 +274,13 @@ def select_checkpoint(container: T.Any = st.sidebar) -> str:
     )
 
 
-@st.cache_data
-def load_audio_file(audio_file: io.BytesIO) -> pydub.AudioSegment:
-    return pydub.AudioSegment.from_file(audio_file)
+def load_audio_file(audio_file) -> pydub.AudioSegment:
+    return pydub.AudioSegment.from_file(audio_file,"wav")
 
 
-@st.cache_resource
 def get_audio_splitter(device: str = "cuda"):
     return AudioSplitter(device=device)
 
-
-@st.cache_resource
 def load_magic_mix_pipeline(
     checkpoint: str = DEFAULT_CHECKPOINT,
     device: str = "cuda",
@@ -313,8 +295,6 @@ def load_magic_mix_pipeline(
 
     return pipeline
 
-
-@st.cache
 def run_img2img_magic_mix(
     prompt: str,
     init_image: Image.Image,
@@ -349,8 +329,6 @@ def run_img2img_magic_mix(
             steps=num_inference_steps,
         )
 
-
-@st.cache
 def run_img2img(
     prompt: str,
     init_image: Image.Image,
