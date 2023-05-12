@@ -1,3 +1,6 @@
+Change the parameters in img2img.py and run img2img.py 
+
+
 # :guitar: Riffusion
 
 <a href="https://github.com/riffusion/riffusion/actions/workflows/ci.yml?query=branch%3Amain"><img alt="CI status" src="https://github.com/riffusion/riffusion/actions/workflows/ci.yml/badge.svg" /></a>
